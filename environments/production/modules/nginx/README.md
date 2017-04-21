@@ -1,319 +1,83 @@
-# NGINX module for Puppet
+# nginx
 
-[![Build Status](https://travis-ci.org/voxpupuli/puppet-nginx.png?branch=master)](https://travis-ci.org/voxpupuli/puppet-nginx)
-[![Code Coverage](https://coveralls.io/repos/github/voxpupuli/puppet-nginx/badge.svg?branch=master)](https://coveralls.io/github/voxpupuli/puppet-nginx)
-[![Puppet Forge](https://img.shields.io/puppetforge/v/puppet/nginx.svg)](https://forge.puppetlabs.com/puppet/nginx)
-[![Puppet Forge - downloads](https://img.shields.io/puppetforge/dt/puppet/nginx.svg)](https://forge.puppetlabs.com/puppet/nginx)
-[![Puppet Forge - endorsement](https://img.shields.io/puppetforge/e/puppet/nginx.svg)](https://forge.puppetlabs.com/puppet/nginx)
-[![Puppet Forge - scores](https://img.shields.io/puppetforge/f/puppet/nginx.svg)](https://forge.puppetlabs.com/puppet/nginx)
+#### Table of Contents
 
-This module got migrated from James Fryman <james@frymanet.com> and
-Matthew Haughton <matt@3flex.com.au> to Vox Pupuli.
+1. [Description](#description)
+1. [Setup - The basics of getting started with nginx](#setup)
+    * [What nginx affects](#what-nginx-affects)
+    * [Setup requirements](#setup-requirements)
+    * [Beginning with nginx](#beginning-with-nginx)
+1. [Usage - Configuration options and additional functionality](#usage)
+1. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
+1. [Limitations - OS compatibility, etc.](#limitations)
+1. [Development - Guide for contributing to the module](#development)
 
-## INSTALLING OR UPGRADING
+## Description
 
-**Please note**: This module is undergoing some structural maintenance.
-You may experience breaking changes between minor versions.
+Start with a one- or two-sentence summary of what the module does and/or what
+problem it solves. This is your 30-second elevator pitch for your module.
+Consider including OS/Puppet version it works with.
 
-This module manages NGINX configuration.
+You can give more descriptive information in a second paragraph. This paragraph
+should answer the questions: "What does this module *do*?" and "Why would I use
+it?" If your module has a range of functionality (installation, configuration,
+management, etc.), this is the time to mention it.
 
-### Requirements
+## Setup
 
-* Puppet 3.8.7 or later
+### What nginx affects **OPTIONAL**
 
-### Additional Documentation
+If it's obvious what your module touches, you can skip this section. For
+example, folks can probably figure out that your mysql_instance module affects
+their MySQL instances.
 
-* [A Quickstart Guide to the NGINX Puppet Module][quickstart]
-  [quickstart]: <https://github.com/voxpupuli/puppet-nginx/blob/master/docs/quickstart.md>
+If there's more that they should know about, though, this is the place to mention:
 
-### Install and bootstrap an NGINX instance
+* A list of files, packages, services, or operations that the module will alter,
+  impact, or execute.
+* Dependencies that your module automatically installs.
+* Warnings or other important notices.
 
-```puppet
-class { 'nginx': }
-```
+### Setup Requirements **OPTIONAL**
 
-### A simple reverse proxy
+If your module requires anything extra before setting up (pluginsync enabled,
+etc.), mention it here.
 
-```puppet
-nginx::resource::server { 'kibana.myhost.com':
-  listen_port => 80,
-  proxy       => 'http://localhost:5601',
-}
-```
+If your most recent release breaks compatibility or requires particular steps
+for upgrading, you might want to include an additional "Upgrading" section
+here.
 
-### A virtual host with static content
+### Beginning with nginx
 
-```puppet
-nginx::resource::server { 'www.puppetlabs.com':
-  www_root => '/var/www/www.puppetlabs.com',
-}
-```
+The very basic steps needed for a user to get the module up and running. This
+can include setup steps, if necessary, or it can be an example of the most
+basic use of the module.
 
-### A more complex proxy example
+## Usage
 
-```puppet
-nginx::resource::upstream { 'puppet_rack_app':
-  members => [
-    'localhost:3000',
-    'localhost:3001',
-    'localhost:3002',
-  ],
-}
+This section is where you describe how to customize, configure, and do the
+fancy stuff with your module here. It's especially helpful if you include usage
+examples and code samples for doing things with your module.
 
-nginx::resource::server { 'rack.puppetlabs.com':
-  proxy => 'http://puppet_rack_app',
-}
-```
+## Reference
 
-### Add a smtp proxy
+Here, include a complete list of your module's classes, types, providers,
+facts, along with the parameters for each. Users refer to this section (thus
+the name "Reference") to find specific details; most users don't read it per
+se.
 
-```puppet
-class { 'nginx':
-  mail => true,
-}
+## Limitations
 
-nginx::resource::mailhost { 'domain1.example':
-  auth_http   => 'server2.example/cgi-bin/auth',
-  protocol    => 'smtp',
-  listen_port => 587,
-  ssl_port    => 465,
-  starttls    => 'only',
-  xclient     => 'off',
-  ssl         => true,
-  ssl_cert    => '/tmp/server.crt',
-  ssl_key     => '/tmp/server.pem',
-}
-```
+This is where you list OS compatibility, version compatibility, etc. If there
+are Known Issues, you might want to include them under their own heading here.
 
-## SSL configuration
+## Development
 
-By default, creating a server resource will only create a HTTP server. To also
-create a HTTPS (SSL-enabled) server, set `ssl => true` on the server. You will
-have a HTTP server listening on `listen_port` (port `80` by default) and a HTTPS
-server listening on `ssl_port` (port `443` by default). Both servers will have
-the same `server_name` and a similar configuration.
+Since your module is awesome, other users will want to play with it. Let them
+know what the ground rules for contributing are.
 
-To create only a HTTPS server, set `ssl => true` and also set `listen_port` to the
-same value as `ssl_port`. Setting these to the same value disables the HTTP server.
-The resulting server will be listening on `ssl_port`.
+## Release Notes/Contributors/Etc. **Optional**
 
-### Locations
-
-Locations require specific settings depending on whether they should be included
-in the HTTP, HTTPS or both servers.
-
-#### HTTP only server (default)
-
-If you only have a HTTP server (i.e. `ssl => false` on the server) make sure you
-don't set `ssl => true` on any location you associate with the server.
-
-#### HTTP and HTTPS server
-
-If you set `ssl => true` and also set `listen_port` and `ssl_port` to different
-values on the server you will need to be specific with the location settings since
-you will have a HTTP server listening on `listen_port` and a HTTPS server listening
-on `ssl_port`:
-
-* To add a location to only the HTTP server, set `ssl => false` on the location
-  (this is the default).
-* To add a location to both the HTTP and HTTPS server, set `ssl => true` on the
-  location, and ensure `ssl_only => false` (which is the default value for `ssl_only`).
-* To add a location only to the HTTPS server, set both `ssl => true`
-  and `ssl_only => true` on the location.
-
-#### HTTPS only server
-
-If you have set `ssl => true` and also set `listen_port` and `ssl_port` to the
-same value on the server, you will have a single HTTPS server listening on
-`ssl_port`. To add a location to this server set `ssl => true` and
-`ssl_only => true` on the location.
-
-## Hiera Support
-
-Defining nginx resources in Hiera.
-
-```yaml
-nginx::nginx_upstreams:
-  'puppet_rack_app':
-    ensure: present
-    members:
-      - localhost:3000
-      - localhost:3001
-      - localhost:3002
-nginx::nginx_servers:
-  'www.puppetlabs.com':
-    www_root: '/var/www/www.puppetlabs.com'
-  'rack.puppetlabs.com':
-    proxy: 'http://puppet_rack_app'
-nginx::nginx_locations:
-  'static':
-    location: '~ "^/static/[0-9a-fA-F]{8}\/(.*)$"'
-    server: www.puppetlabs.com
-    www_root: /var/www/html
-  'userContent':
-    location: /userContent
-    server: www.puppetlabs.com
-    www_root: /var/www/html
-nginx::nginx_mailhosts:
-  'smtp':
-    auth_http: server2.example/cgi-bin/auth
-    protocol: smtp
-    listen_port: 587
-    ssl_port: 465
-    starttls: only
-```
-
-## Nginx with precompiled Passenger
-
-Example configuration for Debian and RHEL / CentOS (>6), pulling the Nginx and
-Passenger packages from the Phusion repo. See additional notes in
-[https://github.com/voxpupuli/puppet-nginx/blob/master/docs/quickstart.md](https://github.com/voxpupuli/puppet-nginx/blob/master/docs/quickstart.md)
-
-```puppet
-class { 'nginx':
-  package_source  => 'passenger',
-  http_cfg_append => {
-    'passenger_root' => '/usr/lib/ruby/vendor_ruby/phusion_passenger/locations.ini',
-  }
-}
-```
-
-Here the example for OpenBSD:
-
-```puppet
-class { 'nginx':
-  package_flavor => 'passenger',
-  service_flags  => '-u'
-  http_cfg_append => {
-    passenger_root          => '/usr/local/lib/ruby/gems/2.1/gems/passenger-4.0.44',
-    passenger_ruby          =>  '/usr/local/bin/ruby21',
-    passenger_max_pool_size => '15',
-  }
-}
-```
-
-Package source `passenger` will add [Phusion Passenger repository](https://oss-binaries.phusionpassenger.com/apt/passenger)
-to APT sources. For each virtual host you should specify which ruby should be used.
-
-```puppet
-nginx::resource::server { 'www.puppetlabs.com':
-  www_root          => '/var/www/www.puppetlabs.com',
-  server_cfg_append => {
-    'passenger_enabled' => 'on',
-    'passenger_ruby'    => '/usr/bin/ruby',
-  }
-}
-```
-
-### Puppet master served by Nginx and Passenger
-
-Virtual host config for serving puppet master:
-
-```puppet
-nginx::resource::server { 'puppet':
-  ensure               => present,
-  server_name          => ['puppet'],
-  listen_port          => 8140,
-  ssl                  => true,
-  ssl_cert             => '/var/lib/puppet/ssl/certs/example.com.pem',
-  ssl_key              => '/var/lib/puppet/ssl/private_keys/example.com.pem',
-  ssl_port             => 8140,
-  server_cfg_append    => {
-    'passenger_enabled'      => 'on',
-    'passenger_ruby'         => '/usr/bin/ruby',
-    'ssl_crl'                => '/var/lib/puppet/ssl/ca/ca_crl.pem',
-    'ssl_client_certificate' => '/var/lib/puppet/ssl/certs/ca.pem',
-    'ssl_verify_client'      => 'optional',
-    'ssl_verify_depth'       => 1,
-  },
-  www_root             => '/etc/puppet/rack/public',
-  use_default_location => false,
-  access_log           => '/var/log/nginx/puppet_access.log',
-  error_log            => '/var/log/nginx/puppet_error.log',
-  passenger_cgi_param  => {
-    'HTTP_X_CLIENT_DN'     => '$ssl_client_s_dn',
-    'HTTP_X_CLIENT_VERIFY' => '$ssl_client_verify',
-  },
-}
-```
-
-### Example puppet class calling nginx::server with HTTPS FastCGI and redirection of HTTP
-
-```puppet
-
-$full_web_path = '/var/www'
-
-define web::nginx_ssl_with_redirect (
-  $backend_port         = 9000,
-  $php                  = true,
-  $proxy                = undef,
-  $www_root             = "${full_web_path}/${name}/",
-  $location_cfg_append  = undef,
-) {
-  nginx::resource::server { "${name}.${::domain}":
-    ensure              => present,
-    www_root            => "${full_web_path}/${name}/",
-    location_cfg_append => { 'rewrite' => '^ https://$server_name$request_uri? permanent' },
-  }
-
-  if !$www_root {
-    $tmp_www_root = undef
-  } else {
-    $tmp_www_root = $www_root
-  }
-
-  nginx::resource::server { "${name}.${::domain} ${name}":
-    ensure                => present,
-    listen_port           => 443,
-    www_root              => $tmp_www_root,
-    proxy                 => $proxy,
-    location_cfg_append   => $location_cfg_append,
-    index_files           => [ 'index.php' ],
-    ssl                   => true,
-    ssl_cert              => '/path/to/wildcard_mydomain.crt',
-    ssl_key               => '/path/to/wildcard_mydomain.key',
-  }
-
-
-  if $php {
-    nginx::resource::location { "${name}_root":
-      ensure          => present,
-      ssl             => true,
-      ssl_only        => true,
-      server           => "${name}.${::domain} ${name}",
-      www_root        => "${full_web_path}/${name}/",
-      location        => '~ \.php$',
-      index_files     => ['index.php', 'index.html', 'index.htm'],
-      proxy           => undef,
-      fastcgi         => "127.0.0.1:${backend_port}",
-      fastcgi_script  => undef,
-      location_cfg_append => {
-        fastcgi_connect_timeout => '3m',
-        fastcgi_read_timeout    => '3m',
-        fastcgi_send_timeout    => '3m'
-      }
-    }
-  }
-}
-```
-
-## Add custom fastcgi_params
-
-```puppet
-nginx::resource::location { "some_root":
-  ensure         => present,
-  location       => '/some/url',
-  fastcgi        => "127.0.0.1:9000",
-  fastcgi_param  => {
-    'APP_ENV' => 'local',
-  },
-}
-```
-
-# Call class web::nginx_ssl_with_redirect
-
-```puppet
-web::nginx_ssl_with_redirect { 'sub-domain-name':
-    backend_port => 9001,
-  }
-```
+If you aren't using changelog, put your release notes here (though you should
+consider using changelog). You can also add any additional sections you feel
+are necessary or important to include here. Please use the `## ` header.

@@ -6,4 +6,6 @@ node default {
 	include files
 	include fqdn
 	include sub
+	include nginx
+
 }
