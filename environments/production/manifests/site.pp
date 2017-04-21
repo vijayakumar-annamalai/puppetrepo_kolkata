@@ -5,4 +5,5 @@ node default {
 	include cron
 	include files
 	include fqdn
+	include sub
 }
